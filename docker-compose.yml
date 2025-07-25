@@ -7,14 +7,19 @@ services:
       context: .
       dockerfile: Dockerfile
     networks:
-      - traefik-public
+      - network_public
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.manual-autonomia.rule=Host(`manual.autonomia.io`)"  # Substitua pelo seu domínio
-        - "traefik.http.routers.manual-autonomia.entrypoints=websecure"
-        - "traefik.http.routers.manual-autonomia.tls.certresolver=myresolver"
-        - "traefik.http.services.manual-autonomia.loadbalancer.server.port=80"
+        - "traefik.http.routers.manual_autonomia.rule=Host(`plataforma.autonomia.site`)"
+        - "traefik.http.routers.manual_autonomia.entrypoints=websecure"
+        - "traefik.http.routers.manual_autonomia.tls.certresolver=letsencryptresolver"
+        - "traefik.http.routers.manual_autonomia.priority=1"
+        - "traefik.http.routers.manual_autonomia.service=manual_autonomia"
+        - "traefik.http.services.manual_autonomia.loadbalancer.server.port=80"
+        - "traefik.http.services.manual_autonomia.loadbalancer.passhostheader=true"
+        - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+        - "traefik.http.routers.manual_autonomia.middlewares=sslheader@docker"
       replicas: 1
       update_config:
         parallelism: 1
@@ -23,5 +28,5 @@ services:
         condition: on-failure
 
 networks:
-  traefik-public:
+  network_public:
     external: true
